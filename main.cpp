@@ -3,7 +3,8 @@
 #include <vector>
 #include "cpu.h"
 #include "pipeline.h"
-
+#include "config.h"   
+Config config;
 int main() {
 
     bool forwarding;
@@ -13,6 +14,9 @@ int main() {
 
     CPU cpu;
     Pipeline pipe;
+
+                 
+    config.loadConfig("config.txt");   
 
     std::vector<Instruction> program;
 
@@ -41,7 +45,6 @@ int main() {
             int rs1 = pipe.ID.instr.rs1;
             int rs2 = pipe.ID.instr.rs2;
 
-          
             if (!pipe.EX.empty) {
 
                 int rd = pipe.EX.instr.rd;
@@ -52,7 +55,6 @@ int main() {
                 }
             }
 
-           
             if (!pipe.MEM.empty) {
 
                 int rd = pipe.MEM.instr.rd;
@@ -64,30 +66,24 @@ int main() {
             }
         }
 
-    
         if (!stall) {
             pipe.advance();
         }
         else {
 
-          
             pipe.WB = pipe.MEM;
             pipe.MEM = pipe.EX;
             pipe.EX.empty = true;
-
-          
 
             stalls++;
 
             std::cout << "STALL inserted\n";
         }
 
-       
         if (!pipe.WB.empty) {
             cpu.execute(pipe.WB.instr);
         }
 
-     
         if (!pipe.EX.empty) {
 
             if (pipe.EX.instr.opcode == "jal") {
@@ -100,7 +96,6 @@ int main() {
             }
         }
 
-       
         if (forwarding && !pipe.EX.empty && !pipe.MEM.empty) {
 
             if (pipe.MEM.instr.rd == pipe.EX.instr.rs1)
