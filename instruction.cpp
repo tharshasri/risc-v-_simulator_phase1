@@ -7,7 +7,7 @@ Instruction parseInstruction(std::string line) {
     Instruction instr;
     std::string temp;
 
-    // initialize fields (VERY IMPORTANT)
+    
     instr.opcode = "";
     instr.rd = -1;
     instr.rs1 = -1;
