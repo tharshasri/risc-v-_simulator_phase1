@@ -5,7 +5,6 @@ CPU::CPU() {
     pc = 0;
     reg.resize(32, 0);
 
-    // Initialize memory
     memory.mem[5] = 10;
 }
 
