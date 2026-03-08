@@ -5,9 +5,10 @@ CPU::CPU() {
     pc = 0;
     reg.resize(32, 0);
 
+    // Initialize memory
     memory.mem[5] = 10;
-
 }
+
 void CPU::execute(Instruction instr) {
 
     if (instr.opcode == "add") {
@@ -17,24 +18,25 @@ void CPU::execute(Instruction instr) {
     else if (instr.opcode == "sub") {
         reg[instr.rd] = reg[instr.rs1] - reg[instr.rs2];
     }
-     else if (instr.opcode == "lw") {
+
+    else if (instr.opcode == "lw") {
         reg[instr.rd] = memory.load(reg[instr.rs1] + instr.imm);
     }
 
     else if (instr.opcode == "sw") {
         memory.store(reg[instr.rs1] + instr.imm, reg[instr.rs2]);
     }
+
     else if (instr.opcode == "bne") {
-
-    if (reg[instr.rs1] != reg[instr.rs2]) {
-        pc += instr.imm;
-        return;
+        if (reg[instr.rs1] != reg[instr.rs2]) {
+            pc += instr.imm;
+        }
     }
-   
 
-}
-
-    pc++;
+    else if (instr.opcode == "jal") {
+        reg[instr.rd] = pc;
+        pc += instr.imm;
+    }
 }
 
 void CPU::printRegisters() {
