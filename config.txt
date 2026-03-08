@@ -1,0 +1,7 @@
+add 1
+sub 1
+mul 5
+lw 2
+sw 2
+bne 1
+jal 1
