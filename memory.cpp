@@ -1,13 +1,32 @@
-#include "memory.h"
+#ifndef MEMORY_H
+#define MEMORY_H
 
-Memory::Memory() {
-    mem.resize(1024, 0);  
-}
+#include <vector>
+#include "cache.h"
 
-int Memory::load(int address) {
-    return mem[address];
-}
+class Memory {
+public:
+    std::vector<int> mem;
 
-void Memory::store(int address, int value) {
-    mem[address] = value;
-}
+    // Cache pointers
+    Cache *L1D;
+    Cache *L1I;
+    Cache *L2;
+
+    int memory_latency;
+
+    // Stats
+    int total_accesses;
+    int total_misses;
+
+    Memory();
+
+    // Data access (for LW, SW)
+    int load(int address, int &latency);
+    int store(int address, int value, int &latency);
+
+    // Instruction fetch
+    int fetch_instruction(int address, int &latency);
+};
+
+#endif

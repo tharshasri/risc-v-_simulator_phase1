@@ -1,9 +1,12 @@
 #include <iostream>
+#include <string>
 #include <fstream>
 #include <vector>
 #include "cpu.h"
 #include "pipeline.h"
 
+#include "config.h"   
+Config config;
 int main() {
 
     bool forwarding;
@@ -13,6 +16,9 @@ int main() {
 
     CPU cpu;
     Pipeline pipe;
+
+                 
+    config.loadConfig("config.txt");   
 
     std::vector<Instruction> program;
 
