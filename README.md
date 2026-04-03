@@ -257,7 +257,14 @@ Possible future enhancements include:
 * Pipeline visualization
 * Support for larger test programs
 
+<<<<<<< HEAD
 
+=======
+# what are not working in this project for now 
+ * the latency is not working properly 
+ * the large codes like bubble sort are not working properly 
+ * mul is also not working .
+>>>>>>> 0007a5e61e9073c07bebc08e75a8e23e76a84be8
 # Author
 
 **Name:** Tharsha Sri

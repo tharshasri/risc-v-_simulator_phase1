@@ -7,7 +7,11 @@ Instruction parseInstruction(std::string line) {
     Instruction instr;
     std::string temp;
 
+<<<<<<< HEAD
    
+=======
+    
+>>>>>>> 0007a5e61e9073c07bebc08e75a8e23e76a84be8
     instr.opcode = "";
     instr.rd = -1;
     instr.rs1 = -1;

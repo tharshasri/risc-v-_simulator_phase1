@@ -1,6 +1,10 @@
 add 1
 sub 1
+<<<<<<< HEAD
 mul 3
+=======
+mul 5
+>>>>>>> 0007a5e61e9073c07bebc08e75a8e23e76a84be8
 lw 2
 sw 2
 bne 1

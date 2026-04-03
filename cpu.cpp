@@ -5,6 +5,10 @@ CPU::CPU() {
     pc = 0;
     reg.resize(32, 0);
 
+<<<<<<< HEAD
+=======
+    
+>>>>>>> 0007a5e61e9073c07bebc08e75a8e23e76a84be8
     memory.mem[5] = 10;
 }
 
