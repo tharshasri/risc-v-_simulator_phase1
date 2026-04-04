@@ -5,10 +5,7 @@ CPU::CPU() {
     pc = 0;
     reg.resize(32, 0);
 
-<<<<<<< HEAD
-=======
-    
->>>>>>> 0007a5e61e9073c07bebc08e75a8e23e76a84be8
+    // Initialize some memory for testing
     memory.mem[5] = 10;
 }
 
@@ -21,13 +18,25 @@ void CPU::execute(Instruction instr) {
     else if (instr.opcode == "sub") {
         reg[instr.rd] = reg[instr.rs1] - reg[instr.rs2];
     }
+    else if (instr.opcode == "mul") {
+    reg[instr.rd] = reg[instr.rs1] * reg[instr.rs2];
+}
 
     else if (instr.opcode == "lw") {
-        reg[instr.rd] = memory.load(reg[instr.rs1] + instr.imm);
+        int latency;
+        int addr = reg[instr.rs1] + instr.imm;
+
+        int value = memory.load(addr, latency);
+        reg[instr.rd] = value;
+
+        // NOTE: pipeline handles stalls, not CPU
     }
 
     else if (instr.opcode == "sw") {
-        memory.store(reg[instr.rs1] + instr.imm, reg[instr.rs2]);
+        int latency;
+        int addr = reg[instr.rs1] + instr.imm;
+
+        memory.store(addr, reg[instr.rs2], latency);
     }
 
     else if (instr.opcode == "bne") {
@@ -40,6 +49,7 @@ void CPU::execute(Instruction instr) {
         reg[instr.rd] = pc;
         pc += instr.imm;
     }
+    std::cout << "Executing: " << instr.opcode << std::endl;
 }
 
 void CPU::printRegisters() {

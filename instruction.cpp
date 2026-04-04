@@ -7,11 +7,6 @@ Instruction parseInstruction(std::string line) {
     Instruction instr;
     std::string temp;
 
-<<<<<<< HEAD
-   
-=======
-    
->>>>>>> 0007a5e61e9073c07bebc08e75a8e23e76a84be8
     instr.opcode = "";
     instr.rd = -1;
     instr.rs1 = -1;
@@ -20,7 +15,8 @@ Instruction parseInstruction(std::string line) {
 
     ss >> instr.opcode;
 
-    if (instr.opcode == "add" || instr.opcode == "sub") {
+    // 🔥 FIXED: added mul here
+    if (instr.opcode == "add" || instr.opcode == "sub" || instr.opcode == "mul") {
 
         ss >> temp;
         instr.rd = std::stoi(temp.substr(1));

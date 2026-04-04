@@ -1,21 +1,22 @@
 #include "pipeline.h"
 #include "config.h"
-#include <iostream>   // ADD THIS LINE
+#include <iostream>
 
 extern Config config;
 
 void Pipeline::advance() {
 
-    // If EX stage instruction still needs cycles
+    // 🔴 EX latency
     if (!EX.empty) {
 
         if (ex_cycles_remaining > 1) {
             ex_cycles_remaining--;
+            stall_cycles++;
             return;
         }
     }
 
-    // Move pipeline
+    // 🔴 MOVE PIPELINE
     WB = MEM;
     MEM = EX;
     EX = ID;
@@ -23,7 +24,7 @@ void Pipeline::advance() {
 
     IF.empty = true;
 
-    // Load latency for instruction entering EX
+    // 🔴 SET EX LATENCY
     if (!EX.empty) {
 
         int lat = config.getLatency(EX.instr.opcode);

@@ -2,14 +2,13 @@
 #include <string>
 #include <fstream>
 #include <vector>
+
 #include "cpu.h"
 #include "pipeline.h"
-<<<<<<< HEAD
+#include "config.h"
 
-=======
->>>>>>> 0007a5e61e9073c07bebc08e75a8e23e76a84be8
-#include "config.h"   
 Config config;
+
 int main() {
 
     bool forwarding;
@@ -20,8 +19,9 @@ int main() {
     CPU cpu;
     Pipeline pipe;
 
-                 
-    config.loadConfig("config.txt");   
+    pipe.memory = &cpu.memory;
+
+    config.loadConfig("config.txt");
 
     std::vector<Instruction> program;
 
@@ -34,7 +34,6 @@ int main() {
     }
 
     int cycles = 0;
-    int stalls = 0;
 
     while (cpu.pc < program.size() ||
            !pipe.IF.empty || !pipe.ID.empty ||
@@ -45,72 +44,79 @@ int main() {
 
         bool stall = false;
 
+        // 🔴 CORRECT HAZARD LOGIC
         if (!pipe.ID.empty) {
 
             int rs1 = pipe.ID.instr.rs1;
             int rs2 = pipe.ID.instr.rs2;
 
+            // EX hazard
             if (!pipe.EX.empty) {
-
                 int rd = pipe.EX.instr.rd;
 
                 if (rd != -1 && (rs1 == rd || rs2 == rd)) {
-                    if (!forwarding)
+
+                    if (!forwarding) {
                         stall = true;
+                    }
+                    else {
+                        // ONLY load-use needs stall
+                        if (pipe.EX.instr.opcode == "lw") {
+                            stall = true;
+                        }
+                    }
                 }
             }
 
+            // MEM hazard
             if (!pipe.MEM.empty) {
-
                 int rd = pipe.MEM.instr.rd;
 
                 if (rd != -1 && (rs1 == rd || rs2 == rd)) {
-                    if (!forwarding)
+
+                    if (!forwarding) {
                         stall = true;
+                    }
                 }
             }
         }
 
+        // 🔴 PIPELINE CONTROL
         if (!stall) {
             pipe.advance();
         }
         else {
-
             pipe.WB = pipe.MEM;
             pipe.MEM = pipe.EX;
             pipe.EX.empty = true;
 
-            stalls++;
-
+            pipe.stall_cycles++;   // ✅ ONLY HERE count stall
             std::cout << "STALL inserted\n";
         }
 
+        // 🔴 EXECUTE WB
         if (!pipe.WB.empty) {
             cpu.execute(pipe.WB.instr);
+            pipe.WB.empty = true;
         }
 
-        if (!pipe.EX.empty) {
-
-            if (pipe.EX.instr.opcode == "jal") {
-
-                cpu.reg[pipe.EX.instr.rd] = cpu.pc - 1;
-                cpu.pc = (cpu.pc - 1) + pipe.EX.instr.imm;
-
-                pipe.IF.empty = true;
-                pipe.ID.empty = true;
-            }
-        }
-
+        // 🔴 FORWARDING
         if (forwarding && !pipe.EX.empty && !pipe.MEM.empty) {
 
-            if (pipe.MEM.instr.rd == pipe.EX.instr.rs1)
+            if (pipe.MEM.instr.rd != -1 &&
+                pipe.MEM.instr.rd == pipe.EX.instr.rs1)
                 cpu.reg[pipe.EX.instr.rs1] = cpu.reg[pipe.MEM.instr.rd];
 
-            if (pipe.MEM.instr.rd == pipe.EX.instr.rs2)
+            if (pipe.MEM.instr.rd != -1 &&
+                pipe.MEM.instr.rd == pipe.EX.instr.rs2)
                 cpu.reg[pipe.EX.instr.rs2] = cpu.reg[pipe.MEM.instr.rd];
         }
 
+        // 🔴 FETCH (NO STALL COUNT HERE)
         if (pipe.IF.empty && cpu.pc < program.size()) {
+
+            int latency;
+            cpu.memory.fetch_instruction(cpu.pc, latency);
 
             pipe.IF.instr = program[cpu.pc];
             pipe.IF.empty = false;
@@ -118,13 +124,17 @@ int main() {
         }
     }
 
+    // 🔴 OUTPUT
     cpu.printRegisters();
 
     std::cout << "Total Cycles: " << cycles << "\n";
-    std::cout << "Total Stalls: " << stalls << "\n";
+    std::cout << "Total Stalls: " << pipe.stall_cycles << "\n";
 
     double ipc = (double)program.size() / cycles;
     std::cout << "IPC: " << ipc << "\n";
+
+    double miss_rate = (double)cpu.memory.total_misses / cpu.memory.total_accesses;
+    std::cout << "Cache Miss Rate: " << miss_rate << "\n";
 
     return 0;
 }

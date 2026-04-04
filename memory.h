@@ -21,12 +21,9 @@ public:
 
     Memory();
 
-    // Data access (for LW, SW)
-    int load(int address, int &latency);
-    int store(int address, int value, int &latency);
-
-    // Instruction fetch
-    int fetch_instruction(int address, int &latency);
+int load(int address, int &latency);
+int store(int address, int value, int &latency);
+int fetch_instruction(int address, int &latency);
 };
 
 #endif

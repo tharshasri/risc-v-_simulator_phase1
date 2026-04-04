@@ -8,30 +8,47 @@ Cache::Cache(int s, int b, int a, int lat) {
     associativity = a;
     latency = lat;
 
+    if (block_size == 0 || associativity == 0) {
+        std::cout << "ERROR: block_size or associativity is 0\n";
+        exit(1);
+    }
+
     num_sets = (size / block_size) / associativity;
+
+    if (num_sets == 0) {
+        std::cout << "ERROR: num_sets is 0 → invalid cache config\n";
+        exit(1);
+    }
+
     sets.resize(num_sets, vector<CacheLine>(associativity));
 
     access_counter = 0;
 }
 
 int Cache::access(int address, bool &hit) {
+
     access_counter++;
 
     int block_addr = address / block_size;
     int index = block_addr % num_sets;
     int tag = block_addr / num_sets;
 
-    // Check HIT
+    // 🔥 CHECK HIT
     for (int i = 0; i < associativity; i++) {
         if (sets[index][i].valid && sets[index][i].tag == tag) {
             hit = true;
+
+            std::cout << "CACHE HIT (Address: " << address << ")\n";  // 🔥 ADD THIS
+
             sets[index][i].last_used = access_counter;
             return latency;
         }
     }
 
-    // MISS → LRU replacement
+    // 🔥 MISS
     hit = false;
+
+    std::cout << "CACHE MISS (Address: " << address << ")\n";  // 🔥 ADD THIS
 
     int lru_index = 0;
     int min_used = sets[index][0].last_used;
