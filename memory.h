@@ -8,7 +8,7 @@ class Memory {
 public:
     std::vector<int> mem;
 
-    // Cache pointers
+    // 🔥 Cache pointers
     Cache *L1D;
     Cache *L1I;
     Cache *L2;
@@ -21,9 +21,9 @@ public:
 
     Memory();
 
-int load(int address, int &latency);
-int store(int address, int value, int &latency);
-int fetch_instruction(int address, int &latency);
+    int load(int address, int &latency);
+    int store(int address, int value, int &latency);
+    int fetch_instruction(int address, int &latency);
 };
 
 #endif

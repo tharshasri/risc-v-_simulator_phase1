@@ -9,6 +9,56 @@ CPU::CPU() {
     memory.mem[5] = 10;
 }
 
+// 🔥 NEW: DATA CACHE ACCESS
+int CPU::accessData(int address) {
+
+    bool hitL1, hitL2;
+    int latency = 0;
+
+    // L1D access
+    latency += L1D.access(address, hitL1);
+
+    if (!hitL1) {
+        std::cout << "L1D MISS → ";
+
+        // L2 access
+        latency += L2.access(address, hitL2);
+
+        if (!hitL2) {
+            std::cout << "L2 MISS → MEMORY\n";
+            latency += mem_latency;
+        } else {
+            std::cout << "L2 HIT\n";
+        }
+    } else {
+        std::cout << "L1D HIT\n";
+    }
+
+    return latency;
+}
+
+// 🔥 NEW: INSTRUCTION CACHE ACCESS
+int CPU::accessInstruction(int address) {
+
+    bool hitL1, hitL2;
+    int latency = 0;
+
+    // L1I access
+    latency += L1I.access(address, hitL1);
+
+    if (!hitL1) {
+
+        latency += L2.access(address, hitL2);
+
+        if (!hitL2) {
+            latency += mem_latency;
+        }
+    }
+
+    return latency;
+}
+
+// 🔥 EXECUTION (KEEP MOSTLY SAME)
 void CPU::execute(Instruction instr) {
 
     if (instr.opcode == "add") {
@@ -18,25 +68,27 @@ void CPU::execute(Instruction instr) {
     else if (instr.opcode == "sub") {
         reg[instr.rd] = reg[instr.rs1] - reg[instr.rs2];
     }
+
     else if (instr.opcode == "mul") {
-    reg[instr.rd] = reg[instr.rs1] * reg[instr.rs2];
-}
+        reg[instr.rd] = reg[instr.rs1] * reg[instr.rs2];
+    }
 
     else if (instr.opcode == "lw") {
-        int latency;
+
         int addr = reg[instr.rs1] + instr.imm;
 
-        int value = memory.load(addr, latency);
-        reg[instr.rd] = value;
+        // 🔥 ONLY FETCH VALUE (latency handled in pipeline)
+        int value = memory.mem[addr];
 
-        // NOTE: pipeline handles stalls, not CPU
+        reg[instr.rd] = value;
     }
 
     else if (instr.opcode == "sw") {
-        int latency;
+
         int addr = reg[instr.rs1] + instr.imm;
 
-        memory.store(addr, reg[instr.rs2], latency);
+        // 🔥 STORE DIRECTLY (latency handled in pipeline)
+        memory.mem[addr] = reg[instr.rs2];
     }
 
     else if (instr.opcode == "bne") {
@@ -49,6 +101,7 @@ void CPU::execute(Instruction instr) {
         reg[instr.rd] = pc;
         pc += instr.imm;
     }
+
     std::cout << "Executing: " << instr.opcode << std::endl;
 }
 

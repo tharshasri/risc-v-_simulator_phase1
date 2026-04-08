@@ -6,6 +6,7 @@ void Config::loadConfig(std::string filename) {
 
     std::ifstream file(filename);
 
+    // 🔴 Check if file opened
     if (!file) {
         std::cout << "Error opening config file\n";
         return;
@@ -14,6 +15,7 @@ void Config::loadConfig(std::string filename) {
     std::string op;
     int lat;
 
+    // 🔴 Read instruction latency
     while (file >> op >> lat) {
         latency[op] = lat;
     }
@@ -23,8 +25,9 @@ void Config::loadConfig(std::string filename) {
 
 int Config::getLatency(std::string opcode) {
 
-    if (latency.find(opcode) != latency.end())
+    if (latency.find(opcode) != latency.end()) {
         return latency[opcode];
+    }
 
     return 1; // default latency
 }

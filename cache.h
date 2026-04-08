@@ -27,8 +27,13 @@ public:
     int num_sets;
     int access_counter;
 
+    // 🔥 NEW (for miss rate)
+    int total_accesses;
+    int total_misses;
+
     vector<vector<CacheLine>> sets;
 
+    Cache() {}  // 🔥 needed for assignment later
     Cache(int s, int b, int a, int lat);
 
     int access(int address, bool &hit);

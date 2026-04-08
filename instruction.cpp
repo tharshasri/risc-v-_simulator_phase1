@@ -15,7 +15,7 @@ Instruction parseInstruction(std::string line) {
 
     ss >> instr.opcode;
 
-    // 🔥 FIXED: added mul here
+    // 🔹 R-type
     if (instr.opcode == "add" || instr.opcode == "sub" || instr.opcode == "mul") {
 
         ss >> temp;
@@ -28,28 +28,65 @@ Instruction parseInstruction(std::string line) {
         instr.rs2 = std::stoi(temp.substr(1));
     }
 
+    // 🔹 LOAD
     else if (instr.opcode == "lw") {
 
-        ss >> temp;
-        instr.rd = std::stoi(temp.substr(1));
+        std::string rd, addr;
+        ss >> rd >> addr;
 
-        ss >> instr.imm;
+        instr.rd = std::stoi(rd.substr(1));
 
-        ss >> temp;
-        instr.rs1 = std::stoi(temp.substr(1));
+        // 🔥 CASE 1: format = 0(x0)
+        if (addr.find('(') != std::string::npos) {
+
+            int pos1 = addr.find('(');
+            int pos2 = addr.find(')');
+
+            std::string imm_str = addr.substr(0, pos1);
+            std::string reg_str = addr.substr(pos1 + 2, pos2 - pos1 - 2);
+
+            instr.imm = std::stoi(imm_str);
+            instr.rs1 = std::stoi(reg_str);
+        }
+        // 🔥 CASE 2: format = 0 x0
+        else {
+            instr.imm = std::stoi(addr);
+
+            ss >> temp;
+            instr.rs1 = std::stoi(temp.substr(1));
+        }
     }
 
+    // 🔹 STORE
     else if (instr.opcode == "sw") {
 
-        ss >> temp;
-        instr.rs2 = std::stoi(temp.substr(1));
+        std::string rs2, addr;
+        ss >> rs2 >> addr;
 
-        ss >> instr.imm;
+        instr.rs2 = std::stoi(rs2.substr(1));
 
-        ss >> temp;
-        instr.rs1 = std::stoi(temp.substr(1));
+        // 🔥 CASE 1: format = 0(x0)
+        if (addr.find('(') != std::string::npos) {
+
+            int pos1 = addr.find('(');
+            int pos2 = addr.find(')');
+
+            std::string imm_str = addr.substr(0, pos1);
+            std::string reg_str = addr.substr(pos1 + 2, pos2 - pos1 - 2);
+
+            instr.imm = std::stoi(imm_str);
+            instr.rs1 = std::stoi(reg_str);
+        }
+        // 🔥 CASE 2: format = 0 x0
+        else {
+            instr.imm = std::stoi(addr);
+
+            ss >> temp;
+            instr.rs1 = std::stoi(temp.substr(1));
+        }
     }
 
+    // 🔹 BNE
     else if (instr.opcode == "bne") {
 
         ss >> temp;
@@ -61,6 +98,7 @@ Instruction parseInstruction(std::string line) {
         ss >> instr.imm;
     }
 
+    // 🔹 JAL
     else if (instr.opcode == "jal") {
 
         ss >> temp;
