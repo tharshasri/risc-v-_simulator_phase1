@@ -13,6 +13,7 @@ int main() {
 
     bool forwarding;
 
+    // ✅ TAKE FORWARDING FROM USER (UNCHANGED)
     std::cout << "Enable forwarding? (1=yes, 0=no): ";
     std::cin >> forwarding;
 
@@ -25,19 +26,27 @@ int main() {
     // Connect pipeline with memory (keep as is)
     pipe.memory = &cpu.memory;
 
-    // 🔥 TAKE CACHE INPUTS
+    // 🔥 TAKE CACHE INPUTS FROM FILE
     int l1_size, l1_block, l1_assoc, l1_lat;
     int l2_size, l2_block, l2_assoc, l2_lat;
     int mem_lat;
 
-    std::cout << "Enter L1 Cache (size block assoc latency): ";
-    std::cin >> l1_size >> l1_block >> l1_assoc >> l1_lat;
+    std::ifstream inputFile("input.txt");
 
-    std::cout << "Enter L2 Cache (size block assoc latency): ";
-    std::cin >> l2_size >> l2_block >> l2_assoc >> l2_lat;
+    if (!inputFile) {
+        std::cout << "Error opening input file\n";
+        return 1;
+    }
 
-    std::cout << "Enter Main Memory Latency: ";
-    std::cin >> mem_lat;
+    
+    inputFile >> l1_size >> l1_block >> l1_assoc >> l1_lat;
+
+    
+    inputFile >> l2_size >> l2_block >> l2_assoc >> l2_lat;
+
+    
+    inputFile >> mem_lat;
+    std::cout << l1_size << " " << l1_block << " " << l1_assoc << " " << l1_lat << "\n";
 
     // 🔥 INITIALIZE CACHES
     cpu.L1I = Cache(l1_size, l1_block, l1_assoc, l1_lat);
@@ -76,7 +85,7 @@ int main() {
         cycles++;
 
         bool stall = false;
-
+           
         // 🔴 DATA HAZARD CHECK
         if (!pipe.ID.empty) {
 
@@ -159,7 +168,7 @@ int main() {
 
             int fetch_latency = cpu.accessInstruction(cpu.pc);
 
-           // pipe.stall_cycles += (fetch_latency - 1);
+            // pipe.stall_cycles += (fetch_latency - 1);
 
             pipe.IF.instr = program[cpu.pc];
             pipe.IF.empty = false;
@@ -177,9 +186,9 @@ int main() {
     std::cout << "IPC: " << ipc << "\n";
 
     double total_accesses = cpu.L1D.total_accesses + cpu.L1I.total_accesses;
-double total_misses   = cpu.L1D.total_misses + cpu.L1I.total_misses;
+    double total_misses   = cpu.L1D.total_misses + cpu.L1I.total_misses;
 
-double miss_rate = (double)total_misses / total_accesses;
+    double miss_rate = (double)total_misses / total_accesses;
     std::cout << "Cache Miss Rate: " << miss_rate << "\n";
 
     return 0;
