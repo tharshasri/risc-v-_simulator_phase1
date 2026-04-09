@@ -31,7 +31,7 @@ int main() {
     int l2_size, l2_block, l2_assoc, l2_lat;
     int mem_lat;
 
-    std::ifstream inputFile("input.txt");
+    std::ifstream inputFile("config.txt");
 
     if (!inputFile) {
         std::cout << "Error opening input file\n";
@@ -46,7 +46,7 @@ int main() {
 
     
     inputFile >> mem_lat;
-    std::cout << l1_size << " " << l1_block << " " << l1_assoc << " " << l1_lat << "\n";
+    
 
     // 🔥 INITIALIZE CACHES
     cpu.L1I = Cache(l1_size, l1_block, l1_assoc, l1_lat);
