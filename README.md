@@ -257,16 +257,234 @@ Possible future enhancements include:
 * Pipeline visualization
 * Support for larger test programs
 
-<<<<<<< HEAD
 
-=======
+
+
 # what are not working in this project for now 
  * the latency is not working properly 
  * the large codes like bubble sort are not working properly 
  * mul is also not working .
->>>>>>> 0007a5e61e9073c07bebc08e75a8e23e76a84be8
+
 # Author
 
 **Name:** Tharsha Sri
 **Program:** Computer Science Engineering
 **Project:** RISC-V Pipeline Simulator
+# RISC-V Pipeline Simulator with Cache (C++)
+
+## 📌 Project Overview
+
+This project implements a **RISC-V Pipeline Simulator** using C++. It models a **5-stage pipelined processor** along with a **multi-level cache hierarchy (L1 Instruction Cache, L1 Data Cache, and L2 Unified Cache)**.
+
+The simulator demonstrates how instructions move through pipeline stages while handling:
+
+- Instruction pipelining  
+- Data hazards  
+- Stall insertion  
+- Forwarding mechanisms  
+- Cache memory behavior  
+- Variable latency execution  
+- Performance metrics  
+
+The simulator takes:
+
+- **Instruction input from `program.asm`**
+- **Cache configuration and instruction latencies from `config.txt`**
+
+and produces:
+
+- Final register values  
+- Total cycles  
+- Total stalls  
+- IPC (Instructions per Cycle)  
+- Cache miss rate  
+
+---
+
+## 🧠 Key Concepts Covered
+
+- 5-stage pipeline architecture (IF, ID, EX, MEM, WB)  
+- Data hazard detection and resolution  
+- Forwarding vs non-forwarding execution  
+- Multi-level cache hierarchy  
+- Variable latency memory access  
+- Performance evaluation using IPC and miss rate  
+
+---
+
+## 🛠️ Development Phases
+
+### 🔹 Phase 1 – Planning  
+**Date:** March 1, 2026  
+
+- Designed overall architecture  
+- Identified core modules:
+  - Instruction parser  
+  - CPU execution  
+  - Memory system  
+  - Pipeline stages  
+  - Hazard detection  
+  - Performance metrics  
+
+### 🔹 Phase 2 – Core Implementation  
+**Date:** March 6, 2026  
+
+Implemented:
+
+- Instruction parser for RISC-V assembly  
+- CPU execution logic  
+- Memory model  
+- 5-stage pipeline simulation  
+
+### 🔹 Phase 3 – Hazard Detection & Forwarding  
+**Date:** March 7, 2026  
+
+- Implemented data hazard detection  
+- Inserted stalls when forwarding is disabled  
+- Enabled forwarding to reduce stalls  
+
+### 🔹 Phase 4 – Cache Integration (Phase 2 Extension)
+
+- Added **L1I, L1D, and L2 caches**
+- Implemented **LRU replacement policy**
+- Introduced **variable latency memory access**
+- Integrated cache with pipeline execution  
+
+---
+
+## 📂 Project Structure
+
+riscv_sim/
+│
+├── main.cpp              # Main driver program  
+├── cpu.cpp / cpu.h       # CPU execution logic  
+├── instruction.cpp/.h    # Instruction parser  
+├── memory.cpp/.h         # Memory + cache integration  
+├── pipeline.cpp/.h       # Pipeline stage logic  
+├── cache.cpp/.h          # Cache implementation (LRU)  
+├── config.cpp/.h         # Instruction latency loader  
+│  
+├── program.asm           # Input RISC-V instructions  
+├── config.txt            # Cache config + instruction latencies  
+│  
+└── README.md             # Project documentation  
+
+---
+
+## ⚙️ Input Files
+
+### 📌 program.asm
+Contains RISC-V assembly instructions to execute.
+
+Example:
+lw x1 0(x0)  
+lw x2 0(x0)  
+lw x3 0(x0)  
+add x4 x1 x2  
+lw x5 4(x0)  
+lw x6 4(x0)  
+
+---
+
+### 📌 config.txt
+Contains cache configuration and instruction latencies.
+
+Example:
+64 4 2 1  
+128 4 2 5  
+20  
+
+lw 2  
+sw 2  
+add 1  
+mul 3  
+sub 1  
+bne 1  
+jal 1  
+
+---
+
+### 🔍 Explanation
+
+- Line 1 → L1 Cache (size, block size, associativity, latency)  
+- Line 2 → L2 Cache  
+- Line 3 → Main memory latency  
+- Remaining lines → Instruction latencies  
+
+---
+
+## ▶️ How to Compile and Run
+
+Step 1 – Navigate to project folder  
+cd riscv_sim  
+
+Step 2 – Compile  
+g++ main.cpp cpu.cpp instruction.cpp memory.cpp pipeline.cpp cache.cpp config.cpp -o sim  
+
+Step 3 – Run  
+./sim  
+
+Step 4 – Input  
+Enable forwarding? (1=yes, 0=no): 1  
+
+---
+
+## 📊 Example Output
+
+CACHE MISS (Address: 0)  
+CACHE HIT (Address: 0)  
+
+Total Cycles: 20  
+Total Stalls: 8  
+IPC: 0.3  
+Cache Miss Rate: 0.36  
+
+---
+
+## 🎯 Learning Outcomes
+
+- Understanding pipelined execution  
+- Handling hazards and stalls  
+- Cache memory hierarchy  
+- Variable latency modeling  
+- Performance evaluation  
+
+---
+
+## ⚠️ Current Limitations
+
+- MUL instruction may not work correctly in all cases  
+- Large programs may not execute fully  
+- Latency modeling can be improved  
+- No branch prediction  
+
+---
+
+## 🚀 Future Improvements
+
+- Branch prediction  
+- Additional cache policies (FIFO, Random)  
+- Pipeline visualization  
+- Support for larger programs  
+- GUI-based simulator  
+
+---
+
+## 🤖 Use of AI Assistance
+
+AI tools were used for:
+
+- Understanding pipeline concepts  
+- Debugging C++ errors  
+- Improving cache integration  
+- Fixing stall logic  
+
+Final implementation and integration were done manually.
+
+---
+
+## 👨‍💻 Author
+
+Name: Tharsha Sri  
+Program: Computer Science Engineering  
+Project: RISC-V Pipeline Simulator with Cache
