@@ -13,7 +13,6 @@ struct Instruction {
 
     int imm = 0;
 
-    // 🔥 NEW FOR PHASE 3
     unsigned int address = 0;
 };
 

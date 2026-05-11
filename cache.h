@@ -27,7 +27,6 @@ public:
     int num_sets;
     int access_counter;
 
-    // 🔥 NEW (for miss rate)
     int total_accesses;
     int total_misses;
 

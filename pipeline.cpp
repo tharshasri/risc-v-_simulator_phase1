@@ -8,20 +8,16 @@ extern CPU cpu;
 
 void Pipeline::advance() {
 
-    // 🔴 HANDLE MULTI-CYCLE EXECUTION (CACHE LATENCY)
-
     if (!EX.empty) {
 
         if (ex_cycles_remaining > 1) {
             ex_cycles_remaining--;
 
-            // ❌ REMOVED: stall_cycles++ (this was causing overcount)
 
             return;  // stall pipeline
         }
     }
 
-    // 🔴 MOVE PIPELINE FORWARD
 
     WB = MEM;
     MEM = EX;
@@ -30,13 +26,12 @@ void Pipeline::advance() {
 
     IF.empty = true;
 
-    // 🔴 SET LATENCY FOR INSTRUCTION ENTERING EX
+
 
     if (!EX.empty) {
 
         int lat = 1;  // default for ALU instructions
 
-        // 🔥 HANDLE LOAD / STORE (DATA CACHE)
         if (EX.instr.opcode == "lw" || EX.instr.opcode == "sw") {
 
             int address = EX.instr.imm;
@@ -57,7 +52,7 @@ void Pipeline::advance() {
 
         ex_cycles_remaining = lat;
 
-        // 🔥 ADD STALLS ONLY HERE (CORRECT PLACE)
+       
         if (lat > 1) {
             stall_cycles += (lat - 1);
         }

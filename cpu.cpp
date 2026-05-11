@@ -11,15 +11,12 @@ CPU::CPU() {
 
     reg.resize(32, 0);
 
-    // Initialize some memory for testing
     memory.mem[4096] = 10;
 memory.mem[4100] = 20;
     memory.mem[5] = 10;
 }
 
-// =====================================================
-// 🔥 DATA CACHE ACCESS
-// =====================================================
+
 
 int CPU::accessData(int address) {
 
@@ -27,7 +24,7 @@ int CPU::accessData(int address) {
 
     int latency = 0;
 
-    // L1D access
+   
 
     latency +=
         L1D.access(address, hitL1);
@@ -36,7 +33,7 @@ int CPU::accessData(int address) {
 
         std::cout << "L1D MISS → ";
 
-        // L2 access
+       
 
         latency +=
             L2.access(address, hitL2);
@@ -65,9 +62,6 @@ int CPU::accessData(int address) {
     return latency;
 }
 
-// =====================================================
-// 🔥 INSTRUCTION CACHE ACCESS
-// =====================================================
 
 int CPU::accessInstruction(int address) {
 
@@ -75,7 +69,6 @@ int CPU::accessInstruction(int address) {
 
     int latency = 0;
 
-    // L1I access
 
     latency +=
         L1I.access(address, hitL1);
@@ -94,13 +87,8 @@ int CPU::accessInstruction(int address) {
     return latency;
 }
 
-// =====================================================
-// 🔥 EXECUTION
-// =====================================================
 
 void CPU::execute(Instruction instr) {
-
-    // 🔥 GET LATENCY FROM CONFIG
 
     int latency =
         config.getLatency(instr.opcode);
@@ -112,9 +100,7 @@ void CPU::execute(Instruction instr) {
         << latency
         << std::endl;
 
-    // =================================================
-    // 🔥 LOWERCASE OLD PHASE SUPPORT
-    // =================================================
+   
 
     if (instr.opcode == "add") {
 
@@ -164,9 +150,6 @@ void CPU::execute(Instruction instr) {
             reg[instr.rs2];
     }
 
-    // =================================================
-    // 🔥 PHASE 3 UPPERCASE SUPPORT
-    // =================================================
 
     else if (instr.opcode == "ADD") {
 
@@ -202,9 +185,7 @@ void CPU::execute(Instruction instr) {
             reg[instr.rs1];
     }
 
-    // =================================================
-    // 🔥 BRANCHES
-    // =================================================
+
 
     else if (instr.opcode == "bne") {
 
@@ -231,9 +212,7 @@ void CPU::execute(Instruction instr) {
         << std::endl;
 }
 
-// =====================================================
-// 🔥 PRINT REGISTERS
-// =====================================================
+
 
 void CPU::printRegisters() {
 

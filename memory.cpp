@@ -4,10 +4,8 @@
 
 Memory::Memory() {
 
-    // 🔥 Bigger memory for Phase 3
     mem.resize(1024 * 1024, 0);
 
-    // 🔥 caches assigned later from main.cpp
     L1D = nullptr;
     L1I = nullptr;
     L2  = nullptr;
@@ -18,9 +16,7 @@ Memory::Memory() {
     total_misses   = 0;
 }
 
-// =====================================================
-// 🔥 LOAD
-// =====================================================
+
 
 int Memory::load(int address, int &latency) {
 
@@ -31,7 +27,7 @@ int Memory::load(int address, int &latency) {
 
     total_accesses++;
 
-    // 🔥 SAFETY CHECK
+   
 
     if (address < 0 || address >= mem.size()) {
 
@@ -43,9 +39,7 @@ int Memory::load(int address, int &latency) {
         return 0;
     }
 
-    // =================================================
-    // 🔥 L1D ACCESS
-    // =================================================
+ 
 
     if (L1D != nullptr) {
 
@@ -53,18 +47,14 @@ int Memory::load(int address, int &latency) {
             L1D->access(address, hitL1);
     }
 
-    // =================================================
-    // 🔥 L2 ACCESS
-    // =================================================
+
 
     if (!hitL1 && L2 != nullptr) {
 
         latency +=
             L2->access(address, hitL2);
 
-        // =============================================
-        // 🔥 MAIN MEMORY ACCESS
-        // =============================================
+      
 
         if (!hitL2) {
 
@@ -77,9 +67,6 @@ int Memory::load(int address, int &latency) {
     return mem[address];
 }
 
-// =====================================================
-// 🔥 STORE
-// =====================================================
 
 int Memory::store(
     int address,
@@ -94,7 +81,6 @@ int Memory::store(
 
     total_accesses++;
 
-    // 🔥 SAFETY CHECK
 
     if (address < 0 || address >= mem.size()) {
 
@@ -106,9 +92,7 @@ int Memory::store(
         return 0;
     }
 
-    // =================================================
-    // 🔥 L1D ACCESS
-    // =================================================
+ 
 
     if (L1D != nullptr) {
 
@@ -116,18 +100,13 @@ int Memory::store(
             L1D->access(address, hitL1);
     }
 
-    // =================================================
-    // 🔥 L2 ACCESS
-    // =================================================
+  
 
     if (!hitL1 && L2 != nullptr) {
 
         latency +=
             L2->access(address, hitL2);
 
-        // =============================================
-        // 🔥 MAIN MEMORY ACCESS
-        // =============================================
 
         if (!hitL2) {
 
@@ -144,9 +123,7 @@ int Memory::store(
     return 0;
 }
 
-// =====================================================
-// 🔥 INSTRUCTION FETCH
-// =====================================================
+
 
 int Memory::fetch_instruction(
     int address,
@@ -160,7 +137,6 @@ int Memory::fetch_instruction(
 
     total_accesses++;
 
-    // 🔥 SAFETY CHECK
 
     if (address < 0 || address >= mem.size()) {
 
@@ -172,9 +148,7 @@ int Memory::fetch_instruction(
         return 0;
     }
 
-    // =================================================
-    // 🔥 L1I ACCESS
-    // =================================================
+  
 
     if (L1I != nullptr) {
 
@@ -182,18 +156,12 @@ int Memory::fetch_instruction(
             L1I->access(address, hitL1);
     }
 
-    // =================================================
-    // 🔥 L2 ACCESS
-    // =================================================
-
     if (!hitL1 && L2 != nullptr) {
 
         latency +=
             L2->access(address, hitL2);
 
-        // =============================================
-        // 🔥 MAIN MEMORY ACCESS
-        // =============================================
+    
 
         if (!hitL2) {
 

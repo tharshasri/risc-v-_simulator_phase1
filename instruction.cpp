@@ -23,13 +23,6 @@ Instruction parseInstruction(std::string line) {
 
     ss >> instr.opcode;
 
-    // =====================================================
-    // 🔥 PHASE 3 TRACE FORMAT
-    // =====================================================
-
-    // LOAD
-    // Example:
-    // L 0x1000 x5
 
     if (instr.opcode == "L") {
 
@@ -45,10 +38,7 @@ Instruction parseInstruction(std::string line) {
             std::stoi(rd.substr(1));
     }
 
-    // STORE
-    // Example:
-    // S 0x1004 x6
-
+    
     else if (instr.opcode == "S") {
 
         std::string addr;
@@ -63,10 +53,7 @@ Instruction parseInstruction(std::string line) {
             std::stoi(rs.substr(1));
     }
 
-    // ADD / MUL
-    // Example:
-    // ADD x7 x5 x6
-    // MUL x8 x7 x9
+  
 
     else if (
         instr.opcode == "ADD" ||
@@ -87,12 +74,8 @@ Instruction parseInstruction(std::string line) {
             std::stoi(rs2.substr(1));
     }
 
-    // =====================================================
-    // 🔥 OLD PHASE 1 / 2 SUPPORT
-    // =====================================================
 
-    // add sub mul
-
+   
     else if (
         instr.opcode == "add" ||
         instr.opcode == "sub" ||
@@ -112,7 +95,6 @@ Instruction parseInstruction(std::string line) {
             std::stoi(temp.substr(1));
     }
 
-    // lw
 
     else if (instr.opcode == "lw") {
 
@@ -123,7 +105,7 @@ Instruction parseInstruction(std::string line) {
         instr.rd =
             std::stoi(rd.substr(1));
 
-        // 0(x0)
+     
 
         if (addr.find('(') != std::string::npos) {
 
@@ -144,7 +126,7 @@ Instruction parseInstruction(std::string line) {
                 std::stoi(reg_str);
         }
 
-        // 0 x0
+        
 
         else {
 
@@ -158,7 +140,7 @@ Instruction parseInstruction(std::string line) {
         }
     }
 
-    // sw
+    
 
     else if (instr.opcode == "sw") {
 
@@ -169,7 +151,7 @@ Instruction parseInstruction(std::string line) {
         instr.rs2 =
             std::stoi(rs2.substr(1));
 
-        // 0(x0)
+       
 
         if (addr.find('(') != std::string::npos) {
 
@@ -190,8 +172,7 @@ Instruction parseInstruction(std::string line) {
                 std::stoi(reg_str);
         }
 
-        // 0 x0
-
+       
         else {
 
             instr.imm =
@@ -204,7 +185,7 @@ Instruction parseInstruction(std::string line) {
         }
     }
 
-    // bne
+    
 
     else if (instr.opcode == "bne") {
 
@@ -221,7 +202,7 @@ Instruction parseInstruction(std::string line) {
         ss >> instr.imm;
     }
 
-    // jal
+   
 
     else if (instr.opcode == "jal") {
 

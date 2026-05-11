@@ -25,7 +25,7 @@ Cache::Cache(int s, int b, int a, int lat) {
 
     access_counter = 0;
 
-    // 🔥 NEW
+    
     total_accesses = 0;
     total_misses = 0;
 }
@@ -33,13 +33,13 @@ Cache::Cache(int s, int b, int a, int lat) {
 int Cache::access(int address, bool &hit) {
 
     access_counter++;
-    total_accesses++;   // 🔥 track accesses
+    total_accesses++;   
 
     int block_addr = address / block_size;
     int index = block_addr % num_sets;
     int tag = block_addr / num_sets;
 
-    // 🔥 CHECK HIT
+    
     for (int i = 0; i < associativity; i++) {
         if (sets[index][i].valid && sets[index][i].tag == tag) {
             hit = true;
@@ -51,16 +51,16 @@ int Cache::access(int address, bool &hit) {
         }
     }
 
-    // 🔥 MISS
+
     hit = false;
-    total_misses++;   // 🔥 track misses
+    total_misses++;   
 
     cout << "CACHE MISS (Address: " << address << ")\n";
 
     int lru_index = -1;
     int min_used = INT_MAX;
 
-    // 🔥 find empty OR LRU
+
     for (int i = 0; i < associativity; i++) {
         if (!sets[index][i].valid) {
             lru_index = i;
@@ -73,7 +73,6 @@ int Cache::access(int address, bool &hit) {
         }
     }
 
-    // 🔥 replace line
     sets[index][lru_index].valid = true;
     sets[index][lru_index].tag = tag;
     sets[index][lru_index].last_used = access_counter;

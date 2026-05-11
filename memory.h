@@ -8,14 +8,14 @@ class Memory {
 public:
     std::vector<int> mem;
 
-    // 🔥 Cache pointers
+    
     Cache *L1D;
     Cache *L1I;
     Cache *L2;
 
     int memory_latency;
 
-    // Stats
+   
     int total_accesses;
     int total_misses;
 

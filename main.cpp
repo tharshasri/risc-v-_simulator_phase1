@@ -14,28 +14,23 @@ int main() {
 
     bool forwarding;
 
-    // ✅ TAKE FORWARDING FROM USER (UNCHANGED)
+    
     std::cout << "Enable forwarding? (1=yes, 0=no): ";
     std::cin >> forwarding;
 
     CPU cpu;
     Pipeline pipe;
 
-    // 🔥 CONNECT CPU TO PIPELINE
+  
     pipe.cpu = &cpu;
 
-    // 🔥 CONNECT MEMORY
     pipe.memory = &cpu.memory;
 
-    // =====================================================
-    // 🔥 LOAD CONFIG FILE
-    // =====================================================
+ 
 
     config.loadConfig("config.txt");
 
-    // =====================================================
-    // 🔥 OLD CACHE CONFIG (UNCHANGED LOGIC)
-    // =====================================================
+ 
 
     int l1_size, l1_block, l1_assoc, l1_lat;
     int l2_size, l2_block, l2_assoc, l2_lat;
@@ -61,9 +56,7 @@ int main() {
 
     inputFile >> mem_lat;
 
-    // =====================================================
-    // 🔥 INITIALIZE CACHES
-    // =====================================================
+   
 
     cpu.L1I =
         Cache(l1_size,
@@ -85,9 +78,6 @@ int main() {
 
     cpu.mem_latency = mem_lat;
 
-    // =====================================================
-    // 🔥 MEMORY CONNECTIONS
-    // =====================================================
 
     cpu.memory.L1D = &cpu.L1D;
     cpu.memory.L1I = &cpu.L1I;
@@ -96,9 +86,6 @@ int main() {
     cpu.memory.memory_latency =
         cpu.mem_latency;
 
-    // =====================================================
-    // 🔥 CREATE VIRTUAL MEMORY
-    // =====================================================
 
     VirtualMemory vm(
 
@@ -119,9 +106,7 @@ int main() {
         config.replacementPolicy
     );
 
-    // =====================================================
-    // 🔥 LOAD TRACE FILE
-    // =====================================================
+   
 
     std::vector<Instruction> program;
 
@@ -148,9 +133,6 @@ int main() {
         Instruction instr =
             parseInstruction(line);
 
-        // =================================================
-        // 🔥 VIRTUAL MEMORY ACCESS
-        // =================================================
 
         if (instr.opcode == "L") {
 
@@ -171,9 +153,7 @@ int main() {
         program.push_back(instr);
     }
 
-    // =====================================================
-    // 🔥 MAIN PIPELINE LOOP
-    // =====================================================
+   
 
     int cycles = 0;
 
@@ -202,9 +182,7 @@ int main() {
 
         bool stall = false;
 
-        // =================================================
-        // 🔴 DATA HAZARD CHECK
-        // =================================================
+      
 
         if (!pipe.ID.empty) {
 
@@ -214,7 +192,7 @@ int main() {
             int rs2 =
                 pipe.ID.instr.rs2;
 
-            // EX hazard
+         
 
             if (!pipe.EX.empty) {
 
@@ -238,7 +216,7 @@ int main() {
 
                     else {
 
-                        // load-use hazard
+                      
 
                         if (
                             pipe.EX.instr.opcode == "lw"
@@ -252,7 +230,7 @@ int main() {
                 }
             }
 
-            // MEM hazard
+       
 
             if (!pipe.MEM.empty) {
 
@@ -277,9 +255,6 @@ int main() {
             }
         }
 
-        // =================================================
-        // 🔴 PIPELINE CONTROL
-        // =================================================
 
         if (!stall) {
 
@@ -300,9 +275,6 @@ int main() {
                 << "STALL inserted\n";
         }
 
-        // =================================================
-        // 🔴 EXECUTE WB
-        // =================================================
 
         if (!pipe.WB.empty) {
 
@@ -313,9 +285,6 @@ int main() {
             pipe.WB.empty = true;
         }
 
-        // =================================================
-        // 🔴 HANDLE JAL
-        // =================================================
 
         if (
             !pipe.EX.empty
@@ -337,9 +306,7 @@ int main() {
             pipe.ID.empty = true;
         }
 
-        // =================================================
-        // 🔴 FORWARDING
-        // =================================================
+      
 
         if (
             forwarding
@@ -390,9 +357,7 @@ int main() {
             }
         }
 
-        // =================================================
-        // 🔴 FETCH
-        // =================================================
+    
 
         if (
 
@@ -417,15 +382,9 @@ int main() {
         }
     }
 
-    // =====================================================
-    // 🔥 ADD TRANSLATION CYCLES
-    // =====================================================
 
     cycles += vm.translationCycles;
 
-    // =====================================================
-    // 🔴 FINAL OUTPUT
-    // =====================================================
 
     cpu.printRegisters();
 
@@ -476,9 +435,6 @@ int main() {
         << miss_rate
         << "\n";
 
-    // =====================================================
-    // 🔥 VM STATISTICS
-    // =====================================================
 
     std::cout
         << "\n===== VM Statistics =====\n";

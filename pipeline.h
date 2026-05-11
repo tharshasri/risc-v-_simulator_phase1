@@ -3,7 +3,7 @@
 
 #include "instruction.h"
 #include "memory.h"
-#include "cpu.h"   // 🔥 ADD THIS
+#include "cpu.h"  
 
 struct Stage {
     Instruction instr;
@@ -21,7 +21,7 @@ public:
 
     Memory *memory;
 
-    // 🔥 ADD THIS (fix error)
+   
     CPU *cpu;
 
     int pc = 0;

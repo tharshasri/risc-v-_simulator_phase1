@@ -23,7 +23,6 @@ void Config::loadConfig(std::string filename) {
 
     while (getline(file, line)) {
 
-        // skip empty lines
 
         if (line.empty()) {
             continue;
@@ -117,7 +116,6 @@ void Config::loadConfig(std::string filename) {
 
                 catch (...) {
 
-                    // ignore invalid values
                 }
             }
         }
@@ -152,7 +150,7 @@ int Config::getLatency(std::string opcode) {
         return latency[opcode];
     }
 
-    // default latency
+  
 
     return 1;
 }
