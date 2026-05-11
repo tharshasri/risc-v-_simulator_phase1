@@ -272,7 +272,7 @@ Possible future enhancements include:
 **Project:** RISC-V Pipeline Simulator
 # RISC-V Pipeline Simulator with Cache (C++)
 
-## 📌 Project Overview
+##  Project Overview
 
 This project implements a **RISC-V Pipeline Simulator** using C++. It models a **5-stage pipelined processor** along with a **multi-level cache hierarchy (L1 Instruction Cache, L1 Data Cache, and L2 Unified Cache)**.
 
@@ -301,7 +301,7 @@ and produces:
 
 ---
 
-## 🧠 Key Concepts Covered
+##  Key Concepts Covered
 
 - 5-stage pipeline architecture (IF, ID, EX, MEM, WB)  
 - Data hazard detection and resolution  
@@ -312,9 +312,9 @@ and produces:
 
 ---
 
-## 🛠️ Development Phases
+##  Development Phases
 
-### 🔹 Phase 1 – Planning  
+###  Phase 1 – Planning  
 **Date:** March 1, 2026  
 
 - Designed overall architecture  
@@ -326,7 +326,7 @@ and produces:
   - Hazard detection  
   - Performance metrics  
 
-### 🔹 Phase 2 – Core Implementation  
+###  Phase 2 – Core Implementation  
 **Date:** March 6, 2026  
 
 Implemented:
@@ -336,14 +336,14 @@ Implemented:
 - Memory model  
 - 5-stage pipeline simulation  
 
-### 🔹 Phase 3 – Hazard Detection & Forwarding  
+###  Phase 3 – Hazard Detection & Forwarding  
 **Date:** March 7, 2026  
 
 - Implemented data hazard detection  
 - Inserted stalls when forwarding is disabled  
 - Enabled forwarding to reduce stalls  
 
-### 🔹 Phase 4 – Cache Integration (Phase 2 Extension)
+###  Phase 4 – Cache Integration (Phase 2 Extension)
 
 - Added **L1I, L1D, and L2 caches**
 - Implemented **LRU replacement policy**
@@ -352,7 +352,7 @@ Implemented:
 
 ---
 
-## 📂 Project Structure
+##  Project Structure
 
 riscv_sim/
 │
@@ -371,9 +371,9 @@ riscv_sim/
 
 ---
 
-## ⚙️ Input Files
+##  Input Files
 
-### 📌 program.asm
+###  program.asm
 Contains RISC-V assembly instructions to execute.
 
 Example:
@@ -386,7 +386,7 @@ lw x6 4(x0)
 
 ---
 
-### 📌 config.txt
+###  config.txt
 Contains cache configuration and instruction latencies.
 
 Example:
@@ -404,7 +404,7 @@ jal 1
 
 ---
 
-### 🔍 Explanation
+###  Explanation
 
 - Line 1 → L1 Cache (size, block size, associativity, latency)  
 - Line 2 → L2 Cache  
@@ -413,7 +413,7 @@ jal 1
 
 ---
 
-## ▶️ How to Compile and Run
+##  How to Compile and Run
 
 Step 1 – Navigate to project folder  
 cd riscv_sim  
@@ -429,7 +429,7 @@ Enable forwarding? (1=yes, 0=no): 1
 
 ---
 
-## 📊 Example Output
+##  Example Output
 
 CACHE MISS (Address: 0)  
 CACHE HIT (Address: 0)  
@@ -441,7 +441,7 @@ Cache Miss Rate: 0.36
 
 ---
 
-## 🎯 Learning Outcomes
+##  Learning Outcomes
 
 - Understanding pipelined execution  
 - Handling hazards and stalls  
@@ -451,7 +451,7 @@ Cache Miss Rate: 0.36
 
 ---
 
-## ⚠️ Current Limitations
+##  Current Limitations
 
 - MUL instruction may not work correctly in all cases  
 - Large programs may not execute fully  
@@ -460,7 +460,7 @@ Cache Miss Rate: 0.36
 
 ---
 
-## 🚀 Future Improvements
+##  Future Improvements
 
 - Branch prediction  
 - Additional cache policies (FIFO, Random)  
@@ -470,7 +470,7 @@ Cache Miss Rate: 0.36
 
 ---
 
-## 🤖 Use of AI Assistance
+##  Use of AI Assistance
 
 AI tools were used for:
 
@@ -483,8 +483,190 @@ Final implementation and integration were done manually.
 
 ---
 
-## 👨‍💻 Author
+##  Author
 
 Name: Tharsha Sri  
 Program: Computer Science Engineering  
 Project: RISC-V Pipeline Simulator with Cache
+
+#  Phase 5 – Virtual Memory Integration (Phase 3 Extension)
+
+Date: April 2026
+
+In this phase, the simulator was extended to support virtual memory concepts along with trace replay execution. The earlier pipeline and cache functionality from previous phases were preserved while adding a new virtual memory subsystem.
+
+The simulator now supports:
+
+* Trace replay mode
+* Virtual address translation
+* Data TLB (Translation Lookaside Buffer)
+* Flat page table
+* Page walks
+* Page faults
+* Frame allocation
+* Finite physical memory
+* FIFO page replacement
+* Dirty page eviction handling
+* Translation penalty cycle calculation
+
+##  Trace Replay Mode
+
+Instead of reading assembly instructions from `program.asm`, the simulator now reads instructions from `trace.txt`.
+
+Supported trace instructions:
+
+```text
+L 0x1000 x1
+S 0x2000 x2
+ADD x3 x1 x2
+MUL x4 x3 x2
+```
+
+### Instruction Meaning
+
+| Instruction | Description               |
+| ----------- | ------------------------- |
+| L           | Load from virtual address |
+| S           | Store to virtual address  |
+| ADD         | Integer addition          |
+| MUL         | Integer multiplication    |
+
+The addresses in the trace are treated as virtual addresses and translated using the virtual memory subsystem.
+
+---
+
+#  Virtual Memory Design
+
+A separate module was added:
+
+```text
+vm.cpp
+vm.h
+```
+
+The virtual memory system performs the following steps:
+
+1. Split virtual address into:
+
+   * VPN (Virtual Page Number)
+   * Offset
+
+2. Check TLB
+
+   * TLB Hit → immediate translation
+   * TLB Miss → page table walk
+
+3. Perform page walk
+
+   * Add page walk latency
+
+4. Handle page faults
+
+   * Allocate physical frame
+   * Add page fault latency
+
+5. Perform page replacement
+
+   * FIFO replacement policy used
+
+6. Track dirty pages during eviction
+
+The simulator uses:
+
+* 32-bit virtual addresses
+* 4KB page size
+* finite physical memory
+
+---
+
+#  Configuration Support
+
+Virtual memory parameters are configurable through `config.txt`.
+
+Example:
+
+```text
+virtual_size_bytes = 65536
+physical_size_bytes = 16384
+page_size_bytes = 4096
+
+dtlb_entries = 4
+tlb_hit_latency = 1
+page_walk_latency = 10
+page_fault_latency = 50
+
+replacement_policy = fifo
+```
+
+This avoids hardcoded VM parameters and makes testing easier.
+
+---
+
+#  Statistics Reported
+
+At the end of execution the simulator reports:
+
+* Total cycles
+* Total stalls
+* IPC
+* Cache miss rate
+* TLB hits
+* TLB misses
+* Page walks
+* Page faults
+* Page evictions
+* Dirty evictions
+* Translation penalty cycles
+
+Example:
+
+```text
+Total Cycles: 131
+Total Stalls: 1
+IPC: 0.038
+
+TLB Hits: 1
+TLB Misses: 2
+Page Faults: 2
+Translation Penalty Cycles: 121
+```
+
+---
+
+#  Current Limitations
+
+The current implementation successfully demonstrates virtual memory concepts but still contains some simplifications:
+
+* FIFO replacement policy implemented (LRU not fully implemented)
+* Simplified TLB replacement logic
+* Simplified multi-cycle execution model
+* Large programs may still not execute fully correctly
+* Instruction cache accesses are still simulated
+* Physical memory modeling is simplified
+
+Despite these limitations, the simulator correctly demonstrates:
+
+* virtual memory translation
+* TLB handling
+* page faults
+* page replacement
+* translation penalties
+* pipeline-cache-memory interaction
+
+---
+
+#  Learning Outcomes from Phase 3
+
+Through this phase, the following concepts were understood clearly:
+
+* Virtual memory systems
+* TLB translation
+* Page table lookup
+* Page faults
+* Frame allocation
+* Page replacement
+* Dirty page handling
+* Translation penalties
+* Integration of cache, pipeline, and memory systems
+
+This phase also improved debugging, modular programming, and performance analysis skills.
