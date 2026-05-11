@@ -4,11 +4,17 @@
 #include <string>
 
 struct Instruction {
+
     std::string opcode;
+
     int rd = -1;
     int rs1 = -1;
     int rs2 = -1;
-     int imm = 0;
+
+    int imm = 0;
+
+    // 🔥 NEW FOR PHASE 3
+    unsigned int address = 0;
 };
 
 Instruction parseInstruction(std::string line);

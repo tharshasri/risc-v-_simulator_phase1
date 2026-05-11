@@ -1,0 +1,5 @@
+L 0x1000 x1
+L 0x1004 x2
+ADD x3 x1 x2
+MUL x4 x3 x2
+S 0x2000 x4

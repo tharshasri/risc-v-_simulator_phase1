@@ -2,10 +2,26 @@
 128 4 2 5
 20
 
-lw 2
-sw 2
+ADD 1
+MUL 3
+L 1
+S 1
+
 add 1
-mul 3
 sub 1
+mul 3
+lw 1
+sw 1
 bne 1
 jal 1
+
+virtual_size_bytes = 65536
+physical_size_bytes = 16384
+page_size_bytes = 4096
+
+dtlb_entries = 4
+tlb_hit_latency = 1
+page_walk_latency = 10
+page_fault_latency = 50
+
+replacement_policy = fifo

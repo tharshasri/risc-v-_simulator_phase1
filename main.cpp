@@ -6,6 +6,7 @@
 #include "cpu.h"
 #include "pipeline.h"
 #include "config.h"
+#include "vm.h"
 
 Config config;
 
@@ -20,13 +21,22 @@ int main() {
     CPU cpu;
     Pipeline pipe;
 
-    // 🔥 CONNECT CPU TO PIPELINE (IMPORTANT)
+    // 🔥 CONNECT CPU TO PIPELINE
     pipe.cpu = &cpu;
 
-    // Connect pipeline with memory (keep as is)
+    // 🔥 CONNECT MEMORY
     pipe.memory = &cpu.memory;
 
-    // 🔥 TAKE CACHE INPUTS FROM FILE
+    // =====================================================
+    // 🔥 LOAD CONFIG FILE
+    // =====================================================
+
+    config.loadConfig("config.txt");
+
+    // =====================================================
+    // 🔥 OLD CACHE CONFIG (UNCHANGED LOGIC)
+    // =====================================================
+
     int l1_size, l1_block, l1_assoc, l1_lat;
     int l2_size, l2_block, l2_assoc, l2_lat;
     int mem_lat;
@@ -34,76 +44,208 @@ int main() {
     std::ifstream inputFile("config.txt");
 
     if (!inputFile) {
+
         std::cout << "Error opening input file\n";
         return 1;
     }
 
-    
-    inputFile >> l1_size >> l1_block >> l1_assoc >> l1_lat;
+    inputFile >> l1_size
+              >> l1_block
+              >> l1_assoc
+              >> l1_lat;
 
-    
-    inputFile >> l2_size >> l2_block >> l2_assoc >> l2_lat;
+    inputFile >> l2_size
+              >> l2_block
+              >> l2_assoc
+              >> l2_lat;
 
-    
     inputFile >> mem_lat;
-    
 
+    // =====================================================
     // 🔥 INITIALIZE CACHES
-    cpu.L1I = Cache(l1_size, l1_block, l1_assoc, l1_lat);
-    cpu.L1D = Cache(l1_size, l1_block, l1_assoc, l1_lat);
-    cpu.L2  = Cache(l2_size, l2_block, l2_assoc, l2_lat);
+    // =====================================================
+
+    cpu.L1I =
+        Cache(l1_size,
+              l1_block,
+              l1_assoc,
+              l1_lat);
+
+    cpu.L1D =
+        Cache(l1_size,
+              l1_block,
+              l1_assoc,
+              l1_lat);
+
+    cpu.L2 =
+        Cache(l2_size,
+              l2_block,
+              l2_assoc,
+              l2_lat);
 
     cpu.mem_latency = mem_lat;
 
-    // 🔥🔥 VERY IMPORTANT FIX (CAUSE OF SEGFAULT)
+    // =====================================================
+    // 🔥 MEMORY CONNECTIONS
+    // =====================================================
+
     cpu.memory.L1D = &cpu.L1D;
     cpu.memory.L1I = &cpu.L1I;
     cpu.memory.L2  = &cpu.L2;
-    cpu.memory.memory_latency = cpu.mem_latency;
 
-    // Load config
-    config.loadConfig("config.txt");
+    cpu.memory.memory_latency =
+        cpu.mem_latency;
+
+    // =====================================================
+    // 🔥 CREATE VIRTUAL MEMORY
+    // =====================================================
+
+    VirtualMemory vm(
+
+        config.virtualSize,
+
+        config.physicalSize,
+
+        config.pageSize,
+
+        config.dtlbEntries,
+
+        config.tlbHitLatency,
+
+        config.pageWalkLatency,
+
+        config.pageFaultLatency,
+
+        config.replacementPolicy
+    );
+
+    // =====================================================
+    // 🔥 LOAD TRACE FILE
+    // =====================================================
 
     std::vector<Instruction> program;
 
-    std::ifstream file("program.asm");
+    std::ifstream file("trace.txt");
+
+    if (!file) {
+
+        std::cout << "Error opening trace.txt\n";
+        return 1;
+    }
+
     std::string line;
 
     while (getline(file, line)) {
-        std::cout << "Reading line: [" << line << "]\n";
-        if (line.empty()) continue;
-        program.push_back(parseInstruction(line));
+
+        std::cout
+            << "Reading line: ["
+            << line
+            << "]\n";
+
+        if (line.empty())
+            continue;
+
+        Instruction instr =
+            parseInstruction(line);
+
+        // =================================================
+        // 🔥 VIRTUAL MEMORY ACCESS
+        // =================================================
+
+        if (instr.opcode == "L") {
+
+            vm.translateAddress(
+                instr.address,
+                false
+            );
+        }
+
+        else if (instr.opcode == "S") {
+
+            vm.translateAddress(
+                instr.address,
+                true
+            );
+        }
+
+        program.push_back(instr);
     }
+
+    // =====================================================
+    // 🔥 MAIN PIPELINE LOOP
+    // =====================================================
 
     int cycles = 0;
 
-    while (cpu.pc < program.size() ||
-           !pipe.IF.empty || !pipe.ID.empty ||
-           !pipe.EX.empty || !pipe.MEM.empty ||
-           !pipe.WB.empty) {
+    while (
+
+        cpu.pc < program.size()
+
+        ||
+
+        !pipe.IF.empty
+        ||
+
+        !pipe.ID.empty
+        ||
+
+        !pipe.EX.empty
+        ||
+
+        !pipe.MEM.empty
+        ||
+
+        !pipe.WB.empty
+    ) {
 
         cycles++;
 
         bool stall = false;
-           
+
+        // =================================================
         // 🔴 DATA HAZARD CHECK
+        // =================================================
+
         if (!pipe.ID.empty) {
 
-            int rs1 = pipe.ID.instr.rs1;
-            int rs2 = pipe.ID.instr.rs2;
+            int rs1 =
+                pipe.ID.instr.rs1;
+
+            int rs2 =
+                pipe.ID.instr.rs2;
 
             // EX hazard
-            if (!pipe.EX.empty) {
-                int rd = pipe.EX.instr.rd;
 
-                if (rd != -1 && (rs1 == rd || rs2 == rd)) {
+            if (!pipe.EX.empty) {
+
+                int rd =
+                    pipe.EX.instr.rd;
+
+                if (
+                    rd != -1
+                    &&
+                    (
+                        rs1 == rd
+                        ||
+                        rs2 == rd
+                    )
+                ) {
 
                     if (!forwarding) {
+
                         stall = true;
                     }
+
                     else {
+
                         // load-use hazard
-                        if (pipe.EX.instr.opcode == "lw") {
+
+                        if (
+                            pipe.EX.instr.opcode == "lw"
+                            ||
+                            pipe.EX.instr.opcode == "L"
+                        ) {
+
                             stall = true;
                         }
                     }
@@ -111,85 +253,270 @@ int main() {
             }
 
             // MEM hazard
-            if (!pipe.MEM.empty) {
-                int rd = pipe.MEM.instr.rd;
 
-                if (rd != -1 && (rs1 == rd || rs2 == rd)) {
+            if (!pipe.MEM.empty) {
+
+                int rd =
+                    pipe.MEM.instr.rd;
+
+                if (
+                    rd != -1
+                    &&
+                    (
+                        rs1 == rd
+                        ||
+                        rs2 == rd
+                    )
+                ) {
+
                     if (!forwarding) {
+
                         stall = true;
                     }
                 }
             }
         }
 
+        // =================================================
         // 🔴 PIPELINE CONTROL
+        // =================================================
+
         if (!stall) {
+
             pipe.advance();
         }
+
         else {
+
             pipe.WB = pipe.MEM;
+
             pipe.MEM = pipe.EX;
+
             pipe.EX.empty = true;
 
             pipe.stall_cycles++;
-            std::cout << "STALL inserted\n";
+
+            std::cout
+                << "STALL inserted\n";
         }
 
+        // =================================================
         // 🔴 EXECUTE WB
+        // =================================================
+
         if (!pipe.WB.empty) {
-            cpu.execute(pipe.WB.instr);
+
+            cpu.execute(
+                pipe.WB.instr
+            );
+
             pipe.WB.empty = true;
         }
 
+        // =================================================
         // 🔴 HANDLE JAL
-        if (!pipe.EX.empty && pipe.EX.instr.opcode == "jal") {
+        // =================================================
 
-            cpu.reg[pipe.EX.instr.rd] = cpu.pc - 1;
-            cpu.pc = (cpu.pc - 1) + pipe.EX.instr.imm;
+        if (
+            !pipe.EX.empty
+            &&
+            pipe.EX.instr.opcode == "jal"
+        ) {
+
+            cpu.reg[
+                pipe.EX.instr.rd
+            ] = cpu.pc - 1;
+
+            cpu.pc =
+                (cpu.pc - 1)
+                +
+                pipe.EX.instr.imm;
 
             pipe.IF.empty = true;
+
             pipe.ID.empty = true;
         }
 
+        // =================================================
         // 🔴 FORWARDING
-        if (forwarding && !pipe.EX.empty && !pipe.MEM.empty) {
+        // =================================================
 
-            if (pipe.MEM.instr.rd != -1 &&
-                pipe.MEM.instr.rd == pipe.EX.instr.rs1)
-                cpu.reg[pipe.EX.instr.rs1] = cpu.reg[pipe.MEM.instr.rd];
+        if (
+            forwarding
+            &&
+            !pipe.EX.empty
+            &&
+            !pipe.MEM.empty
+        ) {
 
-            if (pipe.MEM.instr.rd != -1 &&
-                pipe.MEM.instr.rd == pipe.EX.instr.rs2)
-                cpu.reg[pipe.EX.instr.rs2] = cpu.reg[pipe.MEM.instr.rd];
+            if (
+
+                pipe.MEM.instr.rd != -1
+
+                &&
+
+                pipe.MEM.instr.rd
+                ==
+                pipe.EX.instr.rs1
+            ) {
+
+                cpu.reg[
+                    pipe.EX.instr.rs1
+                ]
+                =
+                cpu.reg[
+                    pipe.MEM.instr.rd
+                ];
+            }
+
+            if (
+
+                pipe.MEM.instr.rd != -1
+
+                &&
+
+                pipe.MEM.instr.rd
+                ==
+                pipe.EX.instr.rs2
+            ) {
+
+                cpu.reg[
+                    pipe.EX.instr.rs2
+                ]
+                =
+                cpu.reg[
+                    pipe.MEM.instr.rd
+                ];
+            }
         }
 
-        // 🔴 FETCH (🔥 UPDATED WITH CACHE)
-        if (pipe.IF.empty && cpu.pc < program.size()) {
+        // =================================================
+        // 🔴 FETCH
+        // =================================================
 
-            int fetch_latency = cpu.accessInstruction(cpu.pc);
+        if (
 
-            // pipe.stall_cycles += (fetch_latency - 1);
+            pipe.IF.empty
 
-            pipe.IF.instr = program[cpu.pc];
+            &&
+
+            cpu.pc < program.size()
+        ) {
+
+            int fetch_latency =
+                cpu.accessInstruction(
+                    cpu.pc
+                );
+
+            pipe.IF.instr =
+                program[cpu.pc];
+
             pipe.IF.empty = false;
+
             cpu.pc++;
         }
     }
 
-    // 🔴 OUTPUT
+    // =====================================================
+    // 🔥 ADD TRANSLATION CYCLES
+    // =====================================================
+
+    cycles += vm.translationCycles;
+
+    // =====================================================
+    // 🔴 FINAL OUTPUT
+    // =====================================================
+
     cpu.printRegisters();
 
-    std::cout << "Total Cycles: " << cycles << "\n";
-    std::cout << "Total Stalls: " << pipe.stall_cycles << "\n";
+    std::cout
+        << "Total Cycles: "
+        << cycles
+        << "\n";
 
-    double ipc = (double)program.size() / cycles;
-    std::cout << "IPC: " << ipc << "\n";
+    std::cout
+        << "Total Stalls: "
+        << pipe.stall_cycles
+        << "\n";
 
-    double total_accesses = cpu.L1D.total_accesses + cpu.L1I.total_accesses;
-    double total_misses   = cpu.L1D.total_misses + cpu.L1I.total_misses;
+    double ipc =
+        (double)program.size()
+        /
+        cycles;
 
-    double miss_rate = (double)total_misses / total_accesses;
-    std::cout << "Cache Miss Rate: " << miss_rate << "\n";
+    std::cout
+        << "IPC: "
+        << ipc
+        << "\n";
+
+    double total_accesses =
+
+        cpu.L1D.total_accesses
+
+        +
+
+        cpu.L1I.total_accesses;
+
+    double total_misses =
+
+        cpu.L1D.total_misses
+
+        +
+
+        cpu.L1I.total_misses;
+
+    double miss_rate =
+
+        (double)total_misses
+        /
+        total_accesses;
+
+    std::cout
+        << "Cache Miss Rate: "
+        << miss_rate
+        << "\n";
+
+    // =====================================================
+    // 🔥 VM STATISTICS
+    // =====================================================
+
+    std::cout
+        << "\n===== VM Statistics =====\n";
+
+    std::cout
+        << "TLB Hits: "
+        << vm.tlbHits
+        << "\n";
+
+    std::cout
+        << "TLB Misses: "
+        << vm.tlbMisses
+        << "\n";
+
+    std::cout
+        << "Page Walks: "
+        << vm.pageWalks
+        << "\n";
+
+    std::cout
+        << "Page Faults: "
+        << vm.pageFaults
+        << "\n";
+
+    std::cout
+        << "Page Evictions: "
+        << vm.evictions
+        << "\n";
+
+    std::cout
+        << "Dirty Evictions: "
+        << vm.dirtyEvictions
+        << "\n";
+
+    std::cout
+        << "Translation Penalty Cycles: "
+        << vm.translationCycles
+        << "\n";
 
     return 0;
 }
